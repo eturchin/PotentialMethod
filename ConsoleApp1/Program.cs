@@ -121,14 +121,9 @@ namespace Source
                 }
             }
 
-            if (c == true)
-            {
-                Console.WriteLine($"\nРешение является оптимальным, где f(x) = {sum}");
-            }
-            else
-            {
-                Console.WriteLine($"\nРешение не является оптимальным, где f(x) = {sum}");
-            }
+            Console.WriteLine(c
+                ? $"\nРешение является оптимальным, где f(x) = {sum}"
+                : $"\nРешение не является оптимальным, где f(x) = {sum}");
 
             Console.ReadKey();
         }
