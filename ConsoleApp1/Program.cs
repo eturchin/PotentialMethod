@@ -4,7 +4,7 @@ namespace Source
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             int[,] price =
             {
@@ -82,24 +82,41 @@ namespace Source
             }
             u[0] = 0;
 
-            var v = new int[b.Length + 1];
+            var v = new int[b.Length];
 
             for (var i = 0; i < b.Length; i++)
             {
                 v[i] = int.MaxValue;
             }
 
-            for (var i = 0; i < supplies.GetLength(0); i++)
-            for (var j = 0; j < supplies.GetLength(1); j++)
+            for (var s = 0; s < supplies.GetLength(0); s++)
             {
-                if (supplies[i, j] == 0) continue;
-                if (v[j] == int.MaxValue && u[i] != int.MaxValue)
+
+
+                for (var i = 0; i < supplies.GetLength(0); i++)
+                for (var j = 0; j < supplies.GetLength(1); j++)
                 {
-                    v[j] = price[i, j] - u[i];
-                }
-                else if (u[i] == int.MaxValue && v[j] != int.MaxValue)
-                {
-                    u[i] = price[i, j] - v[j];
+                    if (supplies[i, j] == 0) continue;
+                    if (v[j] == int.MaxValue && u[i] != int.MaxValue)
+                    {
+                        v[j] = price[i, j] - u[i];
+
+                        //for (var l = 0; l < supplies.GetLength(0); l++)
+                        //{
+                        //    if (supplies[l, j] == 0) continue;
+                        //    u[l] = price[l, j] - v[j];
+                        //}
+                    }
+                    else if (u[i] == int.MaxValue && v[j] != int.MaxValue)
+                    {
+                        u[i] = price[i, j] - v[j];
+
+                        //for (var l = 0; l < supplies.GetLength(1); l++)
+                        //{
+                        //    if (supplies[i, l] == 0) continue;
+                        //    v[l] = price[i, l] - u[i];
+                        //}
+                    }
                 }
             }
 
