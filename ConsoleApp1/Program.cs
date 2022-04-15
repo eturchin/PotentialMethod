@@ -8,9 +8,9 @@ namespace Source
         {
             int[,] price =
             {
-                {4, 1, 2, 3},
-                {3, 6, int.MaxValue, 4},
-                {int.MaxValue, 2, 3, 5}
+                {4, 1, 2, 3, 0},
+                {3, 6, int.MaxValue, 4, 0},
+                {int.MaxValue, 2, 3, 5, 0}
             };
 
             Console.WriteLine("\nDefault Array:");
@@ -19,14 +19,14 @@ namespace Source
             int[] a = {100, 200, 150};
             a.Show("\nSupplies");
 
-            int[] b = {40, 60, 100, 50};
+            int[] b = {40, 60, 100, 50, 200};
             b.Show("\nRequirement");
 
             var bufArr = new int[price.Length];
             var k = 0;
 
             for (var i = 0; i < price.GetLength(0); i++)
-            for (var j = 0; j < price.GetLength(1); j++)
+            for (var j = 0; j < price.GetLength(1) - 1; j++)
             {
                 bufArr[k] = price[i, j];
                 k++;
@@ -40,7 +40,7 @@ namespace Source
             for (k = 0; k < bufArr.Length; k++)
             {
                 for (var i = 0; i < price.GetLength(0); i++)
-                for (var j = 0; j < price.GetLength(1); j++)
+                for (var j = 0; j < price.GetLength(1) - 1; j++)
                     if (bufArr[k] == price[i, j])
                         if (a[i] != 0 && b[j] != 0)
                         {
@@ -62,14 +62,50 @@ namespace Source
 
             }
 
+            for (var i = 0; i < price.GetLength(0); i++)
+            {
+                if (a[i] == 0) continue;
+                supplies[i, price.GetLength(1) - 1] = a[i];
+                a[i] = 0;
+            }
+
             Console.WriteLine("\nDelivery:");
             supplies.Show();
             a.Show("\nSupplies");
             Console.WriteLine($"\nSum: {sum}");
 
-            int[] u = new int[a.Length];
-            u[1] = 0;
-            int[] v = new int[b.Length + 1];
+            var u = new int[a.Length];
+
+            for (var i = 0; i < u.Length; i++)
+            {
+                u[i] = int.MaxValue;
+            }
+            u[0] = 0;
+
+            var v = new int[b.Length + 1];
+
+            for (var i = 0; i < b.Length; i++)
+            {
+                v[i] = int.MaxValue;
+            }
+
+            for (var i = 0; i < supplies.GetLength(0); i++)
+            for (var j = 0; j < supplies.GetLength(1); j++)
+            {
+                if (supplies[i, j] == 0) continue;
+                if (v[j] == int.MaxValue && u[i] != int.MaxValue)
+                {
+                    v[j] = price[i, j] - u[i];
+                }
+                else if (u[i] == int.MaxValue && v[j] != int.MaxValue)
+                {
+                    u[i] = price[i, j] - v[j];
+                }
+            }
+
+            v.Show("\nV");
+            u.Show("\nU");
+
 
             Console.ReadKey();
         }
