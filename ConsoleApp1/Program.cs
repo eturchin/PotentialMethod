@@ -13,14 +13,14 @@ namespace Source
                 {int.MaxValue, 2, 3, 5, 0}
             };
 
-            Console.WriteLine("\nDefault Array:");
+            Console.WriteLine("\nМатрица стоимостей:");
             price.Show();
 
             int[] a = {100, 200, 150};
-            a.Show("\nSupplies");
+            a.Show("Запасы");
 
             int[] b = {40, 60, 100, 50, 200};
-            b.Show("\nRequirement");
+            b.Show("Заявки");
 
             var bufArr = new int[price.Length];
             var k = 0;
@@ -69,10 +69,10 @@ namespace Source
                 a[i] = 0;
             }
 
-            Console.WriteLine("\nDelivery:");
+            Console.WriteLine("\nПоставки:");
             supplies.Show();
-            a.Show("\nSupplies");
-            Console.WriteLine($"\nSum: {sum}");
+            a.Show("Запасы");
+            Console.WriteLine($"\nСумма: {sum}");
 
             var u = new int[a.Length];
 
@@ -91,8 +91,6 @@ namespace Source
 
             for (var s = 0; s < supplies.GetLength(0); s++)
             {
-
-
                 for (var i = 0; i < supplies.GetLength(0); i++)
                 for (var j = 0; j < supplies.GetLength(1); j++)
                 {
@@ -100,29 +98,37 @@ namespace Source
                     if (v[j] == int.MaxValue && u[i] != int.MaxValue)
                     {
                         v[j] = price[i, j] - u[i];
-
-                        //for (var l = 0; l < supplies.GetLength(0); l++)
-                        //{
-                        //    if (supplies[l, j] == 0) continue;
-                        //    u[l] = price[l, j] - v[j];
-                        //}
                     }
                     else if (u[i] == int.MaxValue && v[j] != int.MaxValue)
                     {
                         u[i] = price[i, j] - v[j];
-
-                        //for (var l = 0; l < supplies.GetLength(1); l++)
-                        //{
-                        //    if (supplies[i, l] == 0) continue;
-                        //    v[l] = price[i, l] - u[i];
-                        //}
                     }
                 }
             }
 
-            v.Show("\nV");
-            u.Show("\nU");
+            v.Show("V");
+            u.Show("U");
 
+            var c = true;
+
+            for (var i = 0; i < price.GetLength(0); i++)
+            for (var j = 0; j < price.GetLength(1); j++)
+            {
+                if (supplies[i, j] == 0) continue;
+                if (u[i] + v[j] > price[i, j])
+                {
+                    c = false;
+                }
+            }
+
+            if (c == true)
+            {
+                Console.WriteLine($"\nРешение является оптимальным, где f(x) = {sum}");
+            }
+            else
+            {
+                Console.WriteLine($"\nРешение не является оптимальным, где f(x) = {sum}");
+            }
 
             Console.ReadKey();
         }
