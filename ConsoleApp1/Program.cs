@@ -8,9 +8,9 @@ namespace Source
         {
             float[,] price =
             {
-                {4, 1, 2, 3, 0},
-                {3, 6, 1000, 4, 0},
-                {1000, 2, 3, 5, 0}
+                { 4, 1, 2, 3, 0 },
+                { 3, 6, 1000, 4, 0 },
+                { 1000, 2, 3, 5, 0 }
             };
 
 
@@ -21,27 +21,29 @@ namespace Source
             b.Show("Заявки");
 
             price.Show("\nМатрица стоимостей:");
-            
+
 
             var transportProblem = new TransportProblem(a, b, price);
 
             var supplies = transportProblem.NordWest();
 
             supplies.Show("\nSupplies:");
-
-            var result = transportProblem.PotenMeth(supplies);
             float sum = 0;
-                for (var i = 0; i < result.GetLength(0); i++)
-                for (var j = 0; j < result.GetLength(1) - 1; j++)
-                {
-                    if (!float.IsNaN(result[i, j]) && !float.IsNaN(price[i,j]))
-                    {
-                        sum+=result[i,j]*price[i,j];
-                    }
-                }
-                Console.WriteLine($"\nSum = {sum}");
-                result.Show("\nResult:");
-            Console.ReadKey();
+            for (var i = 0; i < supplies.GetLength(0); i++)
+            for (var j = 0; j < supplies.GetLength(1) - 1; j++)
+                if (!float.IsNaN(supplies[i, j]) && !float.IsNaN(price[i, j]))
+                    sum += supplies[i, j] * price[i, j];
+            Console.WriteLine($"\nSum = {sum}");
+
+            var result = transportProblem.PotentialMethod(supplies);
+            sum = 0;
+            for (var i = 0; i < result.GetLength(0); i++)
+            for (var j = 0; j < result.GetLength(1) - 1; j++)
+                if (!float.IsNaN(result[i, j]) && !float.IsNaN(price[i, j]))
+                    sum += result[i, j] * price[i, j];
+
+            result.Show("\nResult:");
+            Console.WriteLine($"\nSum = {sum}");
         }
     }
 }
