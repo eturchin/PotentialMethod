@@ -1,88 +1,106 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace Source
 {
     public class TransportProblem
     {
-        private Point[] _allowed; // хранит координаты клеток, в которых есть груз
+        private Point[] _allowed;
 
-        public int ASize;
+        public List<float> Ma;
 
-        public int BSize;
+        public List<float> Mb;
 
-        public float[] Ma;
+        public List<List<float>> Mc;
 
-        public float[] Mb;
-
-        public float[,] Mc;
-
-        public TransportProblem(float[] nA, float[] nB, float[,] nC)
+        public TransportProblem(List<float> ma, List<float> mb, List<List<float>> price)
         {
-            if (nA.Length != nC.GetLength(0) || nB.Length != nC.GetLength(1))
-                throw new InvalidInpFormat(
-                    "Размеры массива затрат не соответствуют размерам массивов поставщиков и складов");
-            Ma = nA;
-            Mb = nB;
-            Mc = nC;
-            ASize = nA.Length;
-            BSize = nB.Length;
+            var aSum = ma.Sum();
+            var bSum = mb.Sum();
+            if (aSum < bSum)
+            {
+                var tmp = bSum - aSum;
+                ma.Add(tmp);
+                var zeroLine = new List<float>();
+                Enumerable.Range(0, mb.Count).ToList().ForEach(_ => zeroLine.Add(0));
+                price.Add(zeroLine);
+            }
+            else
+            {
+                var tmp = aSum - bSum;
+                mb.Add(tmp);
+                price.ForEach(line => line.Add(0));
+            }
+
+            Mb = mb;
+            Ma = ma;
+            Mc = price;
         }
 
-        public float[,] NordWest()
+        public List<List<float>> NorthWestMethod()
         {
-            var aBuf = Ma;
-            var bBuf   = Mb;
-            int i = 0, j = 0;
-            var outArr = new float[ASize, BSize];
-            NanToEmpty(outArr);
-
-            while (!(IsEmpty(aBuf) && IsEmpty(bBuf  )))
+            int i, j;
+            var outArr = new List<List<float>>();
+            for (i = 0; i < Ma.Count; i++)
             {
-                var dif = Math.Min(aBuf[i], bBuf  [j]);
-                outArr[i, j] = dif;
-                aBuf[i] -= dif;
-                bBuf  [j] -= dif;
-                if (aBuf[i] == 0 && bBuf  [j] == 0 && j + 1 < BSize) outArr[i, j + 1] = 0;
-                if (aBuf[i] == 0) i++;
-                if (bBuf  [j] == 0) j++;
+                var tmp = new List<float>();
+                Enumerable.Range(0, Mb.Count).ToList().ForEach(_ => tmp.Add(0));
+
+                outArr.Add(tmp);
+            }
+
+            NanToEmpty(outArr);
+            i = 0;
+            j = 0;
+
+            while (!(IsEmpty(Ma) && IsEmpty(Mb)))
+            {
+                var dif = Math.Min(Ma[i], Mb[j]);
+                outArr[i][j] = dif;
+                Ma[i] -= dif;
+                Mb[j] -= dif;
+                if (Ma[i] == 0 && Mb[j] == 0 && j + 1 < Mb.Count) outArr[i][j + 1] = 0;
+                if (Ma[i] == 0) i++;
+                if (Mb[j] == 0) j++;
             }
 
             return outArr;
         }
 
-        private bool IsEmpty(float[] arr)
+        private bool IsEmpty(IEnumerable<float> arr)
         {
-            return Array.TrueForAll(arr, x => x == 0);
+            return arr.All(x => x == 0);
         }
 
-        private void NanToEmpty(float[,] outArr)
+        private void NanToEmpty(IEnumerable<List<float>> outArr)
         {
-            for (var i = 0; i < ASize; i++)
-            for (var j = 0; j < BSize; j++)
-                if (outArr[i, j] == 0)
-                    outArr[i, j] = float.NaN;
+            foreach (var t in outArr)
+                for (var j = 0; j < t.Count; j++)
+                    if (t[j] == 0)
+                        t[j] = float.NaN;
         }
 
-        private void FindUv(float[] u, float[] v, float[,] helpMatr)
+        private void FindUv(IList<float> u, IList<float> v, float[,] helpMatr)
         {
-            var u1 = new bool[ASize];
-            var u2 = new bool[ASize];
-            var v1 = new bool[BSize];
-            var v2 = new bool[BSize];
+            var u1 = new bool[Ma.Count];
+            var u2 = new bool[Ma.Count];
+            var v1 = new bool[Mb.Count];
+            var v2 = new bool[Mb.Count];
             while (!(AllTrue(v1) && AllTrue(u1)))
             {
                 var i = -1;
                 var j = -1;
-                for (var i1 = BSize - 1; i1 >= 0; i1--)
+                for (var i1 = Mb.Count - 1; i1 >= 0; i1--)
                     if (v1[i1] && !v2[i1])
                         i = i1;
-                for (var j1 = ASize - 1; j1 >= 0; j1--)
+                for (var j1 = Ma.Count - 1; j1 >= 0; j1--)
                     if (u1[j1] && !u2[j1])
                         j = j1;
 
                 if (j == -1 && i == -1)
-                    for (var i1 = BSize - 1; i1 >= 0; i1--)
+                    for (var i1 = Mb.Count - 1; i1 >= 0; i1--)
                         if (!v1[i1] && !v2[i1])
                         {
                             i = i1;
@@ -92,7 +110,7 @@ namespace Source
                         }
 
                 if (j == -1 && i == -1)
-                    for (var j1 = ASize - 1; j1 >= 0; j1--)
+                    for (var j1 = Ma.Count - 1; j1 >= 0; j1--)
                         if (!u1[j1] && !u2[j1])
                         {
                             j = j1;
@@ -103,7 +121,7 @@ namespace Source
 
                 if (i != -1)
                 {
-                    for (var j1 = 0; j1 < ASize; j1++)
+                    for (var j1 = 0; j1 < Ma.Count; j1++)
                     {
                         if (!u1[j1]) u[j1] = helpMatr[j1, i] - v[i];
                         if (!float.IsNaN(u[j1])) u1[j1] = true;
@@ -114,7 +132,7 @@ namespace Source
 
                 if (j == -1) continue;
                 {
-                    for (var i1 = 0; i1 < BSize; i1++)
+                    for (var i1 = 0; i1 < Mb.Count; i1++)
                     {
                         if (!v1[i1]) v[i1] = helpMatr[j, i1] - u[j];
                         if (!float.IsNaN(v[i1])) v1[i1] = true;
@@ -127,9 +145,11 @@ namespace Source
 
         private bool AllPositive(float[,] m)
         {
+            var aSize = m.GetLength(0);
+            var bSize = m.GetLength(1);
             var p = true;
-            for (var i = 0; i < ASize && p; i++)
-            for (var j = 0; j < BSize && p; j++)
+            for (var i = 0; i < aSize && p; i++)
+            for (var j = 0; j < bSize && p; j++)
                 if (m[i, j] < 0)
                     p = false;
             return p;
@@ -140,15 +160,15 @@ namespace Source
             return Array.TrueForAll(arr, x => x);
         }
 
-        private float[,] MakeSMatr(float[,] m, float[] u, float[] v)
+        private float[,] MakeSMatr(float[,] m, IReadOnlyList<float> u, IReadOnlyList<float> v)
         {
-            var hm = new float[ASize, BSize];
-            for (var i = 0; i < ASize; i++)
-            for (var j = 0; j < BSize; j++)
+            var hm = new float[Ma.Count, Mb.Count];
+            for (var i = 0; i < Ma.Count; i++)
+            for (var j = 0; j < Mb.Count; j++)
             {
                 hm[i, j] = m[i, j];
                 if (float.IsNaN(hm[i, j]))
-                    hm[i, j] = Mc[i, j] - (u[i] + v[j]);
+                    hm[i, j] = Mc[i][j] - (u[i] + v[j]);
             }
 
             return hm;
@@ -163,16 +183,16 @@ namespace Source
             return way;
         }
 
-        private void Roll(float[,] m, float[,] sm)
+        private void Roll(List<List<float>> m, float[,] sm)
         {
             var minInd = new Point();
             var min = float.MaxValue;
             var k = 0;
-            _allowed = new Point[ASize + BSize];
-            for (var i = 0; i < ASize; i++)
-            for (var j = 0; j < BSize; j++)
+            _allowed = new Point[Ma.Count + Mb.Count];
+            for (var i = 0; i < Ma.Count; i++)
+            for (var j = 0; j < Mb.Count; j++)
             {
-                if (!float.IsNaN(m[i, j]))
+                if (!float.IsNaN(m[i][j]))
                 {
                     _allowed[k].X = i;
                     _allowed[k].Y = j;
@@ -195,7 +215,7 @@ namespace Source
 
             for (var i = 0; i < cycle.Length; i++)
             {
-                cycles[i] = m[cycle[i].X, cycle[i].Y];
+                cycles[i] = m[cycle[i].X][cycle[i].Y];
                 if (i % 2 == 0 && !float.IsNaN(cycles[i]) && cycles[i] < min)
                 {
                     min = cycles[i];
@@ -209,45 +229,45 @@ namespace Source
                 if (i % 2 == 0)
                 {
                     cycles[i] -= min;
-                    m[cycle[i].X, cycle[i].Y] -= min;
+                    m[cycle[i].X][cycle[i].Y] -= min;
                 }
                 else
                 {
                     cycles[i] += min;
-                    if (float.IsNaN(m[cycle[i].X, cycle[i].Y])) m[cycle[i].X, cycle[i].Y] = 0;
-                    m[cycle[i].X, cycle[i].Y] += min;
+                    if (float.IsNaN(m[cycle[i].X][cycle[i].Y])) m[cycle[i].X][cycle[i].Y] = 0;
+                    m[cycle[i].X][cycle[i].Y] += min;
                 }
 
-            m[minInd.X, minInd.Y] = float.NaN;
+            m[minInd.X][minInd.Y] = float.NaN;
         }
 
-        public float[,] PotentialMethod(float[,] supArr)
+        public List<List<float>> PotentialMethod(List<List<float>> supArr)
         {
-            var helpMatr = new float[ASize, BSize];
-            for (var i = 0; i < ASize; i++)
-            for (var j = 0; j < BSize; j++)
-                if (!float.IsNaN(supArr[i, j])) helpMatr[i, j] = Mc[i, j];
+            var helpMatr = new float[Ma.Count, Mb.Count];
+            for (var i = 0; i < Ma.Count; i++)
+            for (var j = 0; j < Mb.Count; j++)
+                if (!float.IsNaN(supArr[i][j])) helpMatr[i, j] = Mc[i][j];
                 else helpMatr[i, j] = float.NaN;
 
-            var u = new float[ASize];
-            var v = new float[BSize];
+            var u = new float[Ma.Count];
+            var v = new float[Mb.Count];
             FindUv(u, v, helpMatr);
             var sMatr = MakeSMatr(helpMatr, u, v);
             while (!AllPositive(sMatr))
             {
                 Roll(supArr, sMatr);
-                for (var i = 0; i < ASize; i++)
-                for (var j = 0; j < BSize; j++)
+                for (var i = 0; i < Ma.Count; i++)
+                for (var j = 0; j < Mb.Count; j++)
                 {
-                    if (float.IsPositiveInfinity(supArr[i, j]))
+                    if (float.IsPositiveInfinity(supArr[i][j]))
                     {
-                        helpMatr[i, j] = Mc[i, j];
-                        supArr[i, j] = 0;
+                        helpMatr[i, j] = Mc[i][j];
+                        supArr[i][j] = 0;
                         continue;
                     }
 
-                    if (!float.IsNaN(supArr[i, j]))
-                        helpMatr[i, j] = Mc[i, j];
+                    if (!float.IsNaN(supArr[i][j]))
+                        helpMatr[i, j] = Mc[i][j];
                     else
                         helpMatr[i, j] = float.NaN;
                 }
@@ -259,26 +279,10 @@ namespace Source
             return supArr;
         }
 
-        private class InvalidInpFormat : ApplicationException
-        {
-            public InvalidInpFormat(string str) : base(str)
-            {
-            }
-
-            public override string ToString()
-            {
-                return Message;
-            }
-        }
-
         private class FindWay
         {
             private readonly Point _begining;
-
             private readonly FindWay _father;
-
-            //true - up/down
-            //false - right/left
             private readonly bool _flag;
             private readonly Point[] _mAllowed;
             private readonly Point _root;
@@ -316,7 +320,7 @@ namespace Source
                 for (var i = 0; i < count; i++)
                 {
                     if (ps[i] == _root) continue;
-                    if (ps[i] == _begining) 
+                    if (ps[i] == _begining)
                     {
                         while (fwu != null)
                         {
