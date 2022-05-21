@@ -36,11 +36,11 @@ namespace Source
                         price.Show("\nМатрица стоимостей:");
 
 
-                        var transportProblem = new TransportProblem(a, b, price);
+                        var transportProblem = new TransportTask(a, b, price);
 
                         price.Show("\nМатрица стоимостей:");
 
-                        var supplies = transportProblem.NorthWestMethod();
+                        var supplies = transportProblem.NorthWestern();
 
                         supplies.Show("\nОппорный план:");
 
@@ -136,11 +136,11 @@ namespace Source
                         price1.Show("\nМатрица стоимостей:");
 
 
-                        var transportProblem1 = new TransportProblem(a1, b1, price1);
+                        var transportProblem1 = new TransportTask(a1, b1, price1);
 
                         price1.Show("\nМатрица стоимостей:");
 
-                        var supplies1 = transportProblem1.NorthWestMethod();
+                        var supplies1 = transportProblem1.NorthWestern();
 
                         supplies1.Show("\nОппорный план:");
 

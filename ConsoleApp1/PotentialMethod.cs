@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Source
 {
-    public class TransportProblem
+    public class TransportTask
     {
         private Point[] _allowed;
 
@@ -15,7 +15,7 @@ namespace Source
 
         public List<List<float>> Mc;
 
-        public TransportProblem(List<float> ma, List<float> mb, List<List<float>> price)
+        public TransportTask(List<float> ma, List<float> mb, List<List<float>> price)
         {
             var aSum = ma.Sum();
             var bSum = mb.Sum();
@@ -39,7 +39,7 @@ namespace Source
             Mc = price;
         }
 
-        public List<List<float>> NorthWestMethod()
+        public List<List<float>> NorthWestern()
         {
             int i, j;
             var outArr = new List<List<float>>();
@@ -51,7 +51,7 @@ namespace Source
                 outArr.Add(tmp);
             }
 
-            NanToEmpty(outArr);
+            EmptyToNan(outArr);
             i = 0;
             j = 0;
 
@@ -74,7 +74,7 @@ namespace Source
             return arr.All(x => x == 0);
         }
 
-        private void NanToEmpty(IEnumerable<List<float>> outArr)
+        private void EmptyToNan(IEnumerable<List<float>> outArr)
         {
             foreach (var t in outArr)
                 for (var j = 0; j < t.Count; j++)
@@ -82,7 +82,7 @@ namespace Source
                         t[j] = float.NaN;
         }
 
-        private void FindUv(IList<float> u, IList<float> v, float[,] helpMatr)
+        private void PotentialFinder(IList<float> u, IList<float> v, float[,] helpMatr)
         {
             var u1 = new bool[Ma.Count];
             var u2 = new bool[Ma.Count];
@@ -143,7 +143,7 @@ namespace Source
             }
         }
 
-        private bool AllPositive(float[,] m)
+        private bool AllSatisfactory(float[,] m)
         {
             var aSize = m.GetLength(0);
             var bSize = m.GetLength(1);
@@ -160,7 +160,7 @@ namespace Source
             return Array.TrueForAll(arr, x => x);
         }
 
-        private float[,] MakeSMatr(float[,] m, IReadOnlyList<float> u, IReadOnlyList<float> v)
+        private float[,] MakeBufMatrix(float[,] m, IReadOnlyList<float> u, IReadOnlyList<float> v)
         {
             var hm = new float[Ma.Count, Mb.Count];
             for (var i = 0; i < Ma.Count; i++)
@@ -243,17 +243,17 @@ namespace Source
 
         public List<List<float>> PotentialMethod(List<List<float>> supArr)
         {
-            var helpMatr = new float[Ma.Count, Mb.Count];
+            var helpMatrix = new float[Ma.Count, Mb.Count];
             for (var i = 0; i < Ma.Count; i++)
             for (var j = 0; j < Mb.Count; j++)
-                if (!float.IsNaN(supArr[i][j])) helpMatr[i, j] = Mc[i][j];
-                else helpMatr[i, j] = float.NaN;
+                if (!float.IsNaN(supArr[i][j])) helpMatrix[i, j] = Mc[i][j];
+                else helpMatrix[i, j] = float.NaN;
 
             var u = new float[Ma.Count];
             var v = new float[Mb.Count];
-            FindUv(u, v, helpMatr);
-            var sMatr = MakeSMatr(helpMatr, u, v);
-            while (!AllPositive(sMatr))
+            PotentialFinder(u, v, helpMatrix);
+            var sMatr = MakeBufMatrix(helpMatrix, u, v);
+            while (!AllSatisfactory(sMatr))
             {
                 Roll(supArr, sMatr);
                 for (var i = 0; i < Ma.Count; i++)
@@ -261,19 +261,19 @@ namespace Source
                 {
                     if (float.IsPositiveInfinity(supArr[i][j]))
                     {
-                        helpMatr[i, j] = Mc[i][j];
+                        helpMatrix[i, j] = Mc[i][j];
                         supArr[i][j] = 0;
                         continue;
                     }
 
                     if (!float.IsNaN(supArr[i][j]))
-                        helpMatr[i, j] = Mc[i][j];
+                        helpMatrix[i, j] = Mc[i][j];
                     else
-                        helpMatr[i, j] = float.NaN;
+                        helpMatrix[i, j] = float.NaN;
                 }
 
-                FindUv(u, v, helpMatr);
-                sMatr = MakeSMatr(helpMatr, u, v);
+                PotentialFinder(u, v, helpMatrix);
+                sMatr = MakeBufMatrix(helpMatrix, u, v);
             }
 
             return supArr;
