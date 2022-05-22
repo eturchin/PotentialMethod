@@ -72,7 +72,7 @@ namespace Source
 
                         while (!int.TryParse(Console.ReadLine(), out n)) Console.Write("Ошибка! Введите целое число:");
 
-                        Console.Write("\nКоличество столбцов n = ");
+                        Console.Write("\nКоличество столбцов m = ");
 
                         int m;
 
