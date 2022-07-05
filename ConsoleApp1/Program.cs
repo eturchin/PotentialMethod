@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Source
 {
@@ -61,7 +62,7 @@ namespace Source
                             if (!float.IsNaN(result[i][j]) && !float.IsNaN(price[i][j]))
                                 sum += result[i][j] * price[i][j];
 
-                        result.Show("\nResult:");
+                        result.Show("\nРезультат:");
                         Console.WriteLine($"\nСумма = {sum}");
                         break;
                     case 2:
@@ -91,10 +92,8 @@ namespace Source
                                 int k;
 
                                 Console.Write($"Стоимость из пункта {i + 1} в пункт {j + 1}: ");
-
                                 while (!int.TryParse(Console.ReadLine(), out k))
                                     Console.Write("Ошибка! Введите целое число:");
-
                                 buf.Add(k);
                             }
 
@@ -161,7 +160,7 @@ namespace Source
                             if (!float.IsNaN(result1[i][j]) && !float.IsNaN(price1[i][j]))
                                 sum1 += result1[i][j] * price1[i][j];
 
-                        result1.Show("\nResult:");
+                        result1.Show("\nРезультат:");
                         Console.WriteLine($"\nСумма = {sum1}");
                         break;
                     case 3:
