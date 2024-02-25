@@ -1,0 +1,1 @@
+The potential method is a modification of the simplex method for solving a linear programming problem as applied to the transport problem. It allows, starting from some feasible solution, to obtain an optimal solution in a finite number of iterations.
